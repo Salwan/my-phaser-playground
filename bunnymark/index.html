@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>hello phaser!</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.6.2/phaser.min.js"></script>
+    </head>
+    <body style="background-color:#333333;">
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+
+        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create , update: update });
+        
+        var bunnies = null;
+        var minX = 0;
+        var minY = 0;
+        var maxX = 800;
+        var maxY = 600;
+        var gravity = 0.5;
+        var fpsTxt = null;
+        var bunnyCountTxt = null;
+        var isAddingBunnies = false;
+
+        function preload () {
+
+            game.load.image('logo', 'phaser.png');
+            game.load.image('bunny', 'wabbit_alpha.png');
+
+        }
+
+        function create () {
+            game.stage.backgroundColor = 0xffffff;
+            
+            bunnies = new game.add.spriteBatch(game.world);
+            for(var i = 0; i < 100; ++i) {
+                addBunny();
+            }
+            
+            var style = {font:"14px sans", fill: "#000"};
+            fpsTxt = game.add.text(10, 10, "FPS: ", style);
+            bunnyCountTxt = game.add.text(800 - 128, 10, "Bunnies: " + bunnies.children.length, style);
+            
+            game.time.advancedTiming = true;
+            
+            game.input.onDown.add(onMouseDown, this);
+            game.input.onUp.add(onMouseUp, this);
+        }
+        
+        function onMouseDown(p) {
+            isAddingBunnies = true;
+        }
+        
+        function onMouseUp(p) {
+            isAddingBunnies = false;
+            bunnyCountTxt.text = "Bunnies: " + bunnies.children.length;
+        }
+        
+        function update() {
+            fpsTxt.text = "FPS: " + game.time.fps.toString();
+            var time_factor = game.time.physicsElapsed * 60.0;
+            var b;
+            for(var ib in bunnies.children) {
+                b = bunnies.children[ib];
+                if(b) {
+                    b.x += b.speedX * time_factor;
+                    b.y += b.speedY * time_factor;
+                    b.speedY += gravity;
+                    if(b.x > maxX) {
+                        b.speedX *= -1;
+                        b.x = maxX;
+                    } else if(b.x < minX) {
+                        b.speedX *= -1;
+                        b.x = minX;
+                    }
+                    
+                    if(b.y > maxY) {
+                        b.speedY *= -0.8;
+                        b.y = maxY;
+                        if(Math.random() > 0.5) {
+                            b.speedY -= 3 + Math.random() * 4;
+                        }
+                    } else if(b.y < minY) {
+                        b.speedY = 0;
+                        b.y = minY;
+                    }
+                }
+            }
+            if(isAddingBunnies) {
+                for(var i = 0; i < 100; ++i) {
+                    addBunny();
+                }
+            }
+        }
+        
+        function addBunny() {
+            var bunny = game.make.sprite(0, 0, 'bunny');
+            bunny.speedX = (Math.random() * 5);
+            bunny.speedY = (Math.random() * 5) - 2.5;
+            bunnies.addChild(bunny);
+        }
+
+    };
+
+    </script>
+
+    </body>
+</html>
